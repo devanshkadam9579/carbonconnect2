@@ -1,0 +1,7 @@
+{
+  "name": "Remix: Carbon Connect",
+  "description": "A comprehensive carbon credit platform for farmers, admins, and buyers. Features farmer onboarding, AI-driven validation with satellite data, and a credit marketplace.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}

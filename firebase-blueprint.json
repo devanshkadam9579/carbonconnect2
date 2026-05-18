@@ -1,0 +1,40 @@
+{
+  "entities": {
+    "Farmer": {
+      "title": "Farmer",
+      "description": "Farmer profile and farm details",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "cropType": { "type": "string" },
+        "cropMethod": { "type": "string" },
+        "location": { "type": "object" },
+        "status": { "type": "string", "enum": ["active", "under_observation", "validated", "rejected"] },
+        "userId": { "type": "string" },
+        "createdAt": { "type": "number" }
+      },
+      "required": ["name", "cropType", "location", "status", "userId"]
+    },
+    "Project": {
+      "title": "Carbon Project",
+      "description": "Validated carbon credit project",
+      "type": "object",
+      "properties": {
+        "farmerId": { "type": "string" },
+        "ndviScore": { "type": "number" },
+        "carbonCreditsEstimated": { "type": "number" },
+        "isPublished": { "type": "boolean" }
+      }
+    }
+  },
+  "firestore": {
+    "/farmers/{farmerId}": {
+      "schema": "Farmer",
+      "description": "Collection of farmer applications"
+    },
+    "/projects/{projectId}": {
+      "schema": "Project",
+      "description": "Collection of validated carbon projects"
+    }
+  }
+}

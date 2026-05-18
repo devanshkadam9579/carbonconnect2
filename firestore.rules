@@ -1,0 +1,64 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() && 
+        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
+         (request.auth.token.email == "chirayuadivarekar@gmail.com" && request.auth.token.email_verified == true));
+    }
+
+    function isValidString(val, maxLen) {
+      return val is string && val.size() <= maxLen;
+    }
+
+    function hasOnlyAllowedFields(data, allowedFields) {
+      return data.keys().hasOnly(allowedFields);
+    }
+
+    // ===============================================================
+    // Domain Validators
+    // ===============================================================
+    function isValidFarmer(data) {
+      let requiredFields = ['name', 'cropType', 'location', 'status', 'userId', 'createdAt', 'isPublished'];
+      return data.keys().hasAll(requiredFields) &&
+             isValidString(data.name, 100) &&
+             isValidString(data.cropType, 50) &&
+             data.status in ['active', 'under_observation', 'validated', 'rejected'] &&
+             data.userId == request.auth.uid &&
+             data.createdAt is number &&
+             data.isPublished is bool;
+    }
+
+    match /farmers/{farmerId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && isValidFarmer(request.resource.data);
+      allow update: if isAdmin() || 
+                    (isOwner(resource.data.userId) && 
+                     resource.data.status == 'active' && 
+                     isValidFarmer(request.resource.data) &&
+                     request.resource.data.isPublished == resource.data.isPublished); // Farmers can't publish themselves
+      allow delete: if isAdmin();
+    }
+
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      allow create: if isOwner(userId) && 
+                      hasOnlyAllowedFields(request.resource.data, ['email', 'role', 'createdAt']) &&
+                      request.resource.data.role in ['admin', 'farmer', 'buyer'];
+      allow update: if isAdmin() || (isOwner(userId) && 
+                      request.resource.data.diff(resource.data).affectedKeys().hasOnly(['email']) &&
+                      isValidString(request.resource.data.email, 100));
+    }
+  }
+}
