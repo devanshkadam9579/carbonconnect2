@@ -2,8 +2,6 @@ import React from 'react';
 import { motion } from 'motion/react';
 import { Leaf, User, LayoutDashboard, ShoppingCart, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Toaster } from '@/components/ui/sonner';
-
 import { APP_LOGO_URL } from '@/src/constants';
 
 interface LayoutProps {
@@ -83,7 +81,6 @@ export default function Layout({ children, role, onLogout, activeTab, onTabChang
         </div>
       )}
 
-      <Toaster />
     </div>
   );
 }
