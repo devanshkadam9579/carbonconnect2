@@ -233,16 +233,15 @@ This project contributes to SDG 13 (Climate Action), SDG 15 (Life on Land), and 
 
 // ─── Server ─────────────────────────────────────────────────────────────────
 
-async function startServer() {
-  const app = express();
-  const PORT = 3000;
+export const app = express();
+const PORT = 3000;
 
-  app.use(express.json({ limit: "10mb" }));
-  app.use((req, res, next) => {
-    res.header("Access-Control-Allow-Origin", "*");
-    res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
-    next();
-  });
+app.use(express.json({ limit: "10mb" }));
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  next();
+});
 
   // ── Health check ──────────────────────────────────────────────────────────
   app.get("/api/health", (_req, res) => {
@@ -449,22 +448,22 @@ async function startServer() {
   });
 
   // ── Vite Middleware (Development) ─────────────────────────────────────────
-  if (process.env.NODE_ENV !== "production") {
-    const vite = await createViteServer({
+  if (process.env.NODE_ENV !== "production" && !process.env.NETLIFY) {
+    createViteServer({
       server: { middlewareMode: true },
       appType: "spa",
+    }).then(vite => {
+      app.use(vite.middlewares);
     });
-    app.use(vite.middlewares);
-  } else {
+  } else if (!process.env.NETLIFY) {
     const distPath = path.join(process.cwd(), "dist");
     app.use(express.static(distPath));
     app.get("*", (_req, res) => res.sendFile(path.join(distPath, "index.html")));
   }
 
-  app.listen(PORT, "0.0.0.0", () => {
-    console.log(`Server running on http://localhost:${PORT}`);
-    console.log(`API Health: http://localhost:${PORT}/api/health`);
-  });
-}
-
-startServer();
+  if (!process.env.NETLIFY && process.env.NODE_ENV !== "test") {
+    app.listen(PORT, "0.0.0.0", () => {
+      console.log(`Server running on http://localhost:${PORT}`);
+      console.log(`API Health: http://localhost:${PORT}/api/health`);
+    });
+  }
