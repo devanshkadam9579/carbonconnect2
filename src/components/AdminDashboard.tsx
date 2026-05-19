@@ -85,6 +85,11 @@ export default function AdminDashboard({ projects, orders, onValidate, onDelete,
       body: JSON.stringify({ farmerData: project }),
       signal: ctrl.signal,
     }).then(async (resp) => {
+      if (!resp.ok) {
+        setStreamMsg('Validation failed: ' + resp.statusText);
+        toast.error('Validation failed: ' + resp.statusText);
+        return;
+      }
       const reader = resp.body!.getReader();
       const dec = new TextDecoder();
       let buf = '';

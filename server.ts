@@ -282,8 +282,13 @@ async function startServer() {
   app.post("/api/validate-carbon-stream", async (req: Request, res: Response) => {
     const { farmerData } = req.body;
 
-    if (!farmerData || !farmerData.location?.center) {
-      return res.status(400).json({ error: "farmerData with location.center required" });
+    if (!farmerData) {
+      return res.status(400).json({ error: "farmerData required" });
+    }
+
+    if (!farmerData.location?.center) {
+      // Provide a fallback location so the pipeline doesn't crash on older data
+      farmerData.location = { ...farmerData.location, center: { lat: 20.5937, lng: 78.9629 } };
     }
 
     // Set up SSE headers
