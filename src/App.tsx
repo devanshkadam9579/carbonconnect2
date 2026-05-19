@@ -363,7 +363,11 @@ export default function App() {
             {activeTab === 'dashboard' ? (
               <FarmerDashboard projects={projects} userId={user.uid} onLogout={handleLogout} />
             ) : (
-              <FarmerOnboarding onSubmit={handleFarmerSubmit} isSubmitting={isSubmitting} />
+            <FarmerOnboarding 
+              onSubmit={handleFarmerSubmit} 
+              isSubmitting={isSubmitting} 
+              onCancel={() => setActiveTab('dashboard')} 
+            />
             )}
           </motion.div>
         ) : role === 'admin' ? (

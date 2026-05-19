@@ -79,9 +79,10 @@ const TRANSLATIONS = {
 interface FarmerOnboardingProps {
   onSubmit: (data: any) => void;
   isSubmitting?: boolean;
+  onCancel?: () => void;
 }
 
-export default function FarmerOnboarding({ onSubmit, isSubmitting = false }: FarmerOnboardingProps) {
+export default function FarmerOnboarding({ onSubmit, isSubmitting = false, onCancel }: FarmerOnboardingProps) {
   const [step, setStep] = useState(1);
   const [lang, setLang] = useState<'en' | 'hi'>('en');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -548,7 +549,7 @@ export default function FarmerOnboarding({ onSubmit, isSubmitting = false }: Far
 
       {/* Mobile Sticky Footer Navigation */}
       <div className="bg-white border-t p-4 flex gap-3 sticky bottom-0 z-10 md:relative md:bg-transparent md:border-none md:p-0 md:mt-8 md:justify-end">
-        {step > 1 && (
+        {step > 1 ? (
           <Button 
             variant="outline" 
             onClick={prevStep} 
@@ -557,7 +558,16 @@ export default function FarmerOnboarding({ onSubmit, isSubmitting = false }: Far
           >
             <ArrowLeft className="mr-2 w-5 h-5" /> {t.back}
           </Button>
-        )}
+        ) : onCancel ? (
+          <Button 
+            variant="outline" 
+            onClick={onCancel} 
+            disabled={isSubmitting} 
+            className="flex-1 md:flex-none h-14 md:h-12 rounded-2xl md:px-8 border-gray-200 font-bold"
+          >
+            <ArrowLeft className="mr-2 w-5 h-5" /> Cancel
+          </Button>
+        ) : null}
         
         {step < 3 ? (
           <Button 
