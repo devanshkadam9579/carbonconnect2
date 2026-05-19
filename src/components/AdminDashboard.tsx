@@ -60,7 +60,16 @@ export default function AdminDashboard({ projects, orders, onValidate, onDelete,
   });
 
   const openStreamValidation = (project: any) => {
-    setStreamProject(project);
+    // Provide a fallback location for older test data that lacks boundaries
+    const fallbackProject = { ...project };
+    if (!fallbackProject.location?.center) {
+      fallbackProject.location = {
+        ...fallbackProject.location,
+        center: { lat: 20.5937, lng: 78.9629 }
+      };
+    }
+
+    setStreamProject(fallbackProject);
     setStreamSteps({});
     setStreamResults(null);
     setStreamProgress(0);
@@ -82,7 +91,7 @@ export default function AdminDashboard({ projects, orders, onValidate, onDelete,
     fetch('/api/validate-carbon-stream', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ farmerData: project }),
+      body: JSON.stringify({ farmerData: fallbackProject }),
       signal: ctrl.signal,
     }).then(async (resp) => {
       if (!resp.ok) {
